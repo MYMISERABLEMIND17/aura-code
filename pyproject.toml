@@ -1,0 +1,23 @@
+[project]
+name = "auracode"
+version = "5.0.0"
+description = "Dev Spotify Wrapped & GitHub Clout Engine"
+readme = "README.md"
+requires-python = ">=3.11"
+dependencies = [
+    "fastapi>=0.110.0",
+    "uvicorn>=0.28.0",
+    "pydantic>=2.6.0",
+    "pydantic-settings>=2.2.0",
+    "sqlalchemy>=2.0.28",
+    "asyncpg>=0.29.0",
+    "alembic>=1.13.1",
+    "redis>=5.0.2",
+    "httpx>=0.27.0",
+    "pybreaker>=1.0.1",
+    "aioboto3>=12.3.0",
+    "cryptography>=42.0.5"
+]
+
+[tool.pytest.ini_options]
+asyncio_mode = "auto"
