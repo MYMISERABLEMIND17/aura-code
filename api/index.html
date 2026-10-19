@@ -1,0 +1,652 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AuraCode // Dev Spotify Wrapped &amp; GitHub Clout Engine</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600;700;800&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg-base: #07080a;
+      --bg-surface: #0f0f10;
+      --bg-elevated: #161719;
+      --bg-card: #1c1c1e;
+      --border-subtle: #26282c;
+      --border-active: #3a3d45;
+      --text-primary: #f4f4f6;
+      --text-muted: #8e8e93;
+      --accent-green: #27ae60;
+      --accent-amber: #f39c12;
+      --accent-red: #ff6363;
+      --accent-blue: #2997ff;
+      --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      --font-mono: 'JetBrains Mono', monospace;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      background-color: var(--bg-base);
+      color: var(--text-primary);
+      font-family: var(--font-sans);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 40px 20px 80px;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    /* Ambient Titanium Glow */
+    .ambient-glow {
+      position: fixed;
+      top: -120px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 700px;
+      height: 350px;
+      background: radial-gradient(ellipse at center, rgba(41, 151, 255, 0.08) 0%, rgba(7, 8, 10, 0) 70%);
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    .container {
+      width: 100%;
+      max-width: 900px;
+      position: relative;
+      z-index: 1;
+      display: flex;
+      flex-direction: column;
+      gap: 32px;
+    }
+
+    /* Navigation Bar */
+    header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 16px 20px;
+      background: var(--bg-surface);
+      border: 1px solid var(--border-subtle);
+      border-radius: 12px;
+    }
+
+    .logo-badge {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-weight: 700;
+      font-size: 14px;
+      letter-spacing: 0.5px;
+    }
+
+    .pill-tag {
+      background: var(--bg-card);
+      border: 1px solid var(--border-subtle);
+      color: var(--accent-blue);
+      font-size: 11px;
+      padding: 3px 8px;
+      border-radius: 6px;
+      font-family: var(--font-mono);
+      font-weight: 600;
+    }
+
+    .status-live {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 12px;
+      color: var(--text-muted);
+      font-family: var(--font-mono);
+    }
+
+    .dot-live {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: var(--accent-green);
+      box-shadow: 0 0 8px rgba(39, 174, 96, 0.6);
+      animation: pulse 2s infinite ease-in-out;
+    }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.4; }
+    }
+
+    /* Hero Section */
+    .hero {
+      text-align: center;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 12px;
+      margin-top: 10px;
+    }
+
+    .hero-title {
+      font-size: 42px;
+      font-weight: 800;
+      letter-spacing: -1.2px;
+      line-height: 1.15;
+    }
+
+    .hero-subtitle {
+      font-size: 16px;
+      color: var(--text-muted);
+      max-width: 580px;
+      line-height: 1.5;
+    }
+
+    /* Command Search Bar (Raycast Style) */
+    .search-card {
+      background: var(--bg-surface);
+      border: 1px solid var(--border-subtle);
+      border-radius: 14px;
+      padding: 8px;
+      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.5);
+      transition: border-color 0.2s, box-shadow 0.2s;
+    }
+
+    .search-card:focus-within {
+      border-color: var(--accent-blue);
+      box-shadow: 0 0 0 2px rgba(41, 151, 255, 0.2), 0 20px 40px rgba(0, 0, 0, 0.6);
+    }
+
+    .search-input-wrapper {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 10px 14px;
+      background: var(--bg-elevated);
+      border-radius: 10px;
+    }
+
+    .search-icon {
+      color: var(--text-muted);
+      font-size: 18px;
+    }
+
+    .search-input {
+      flex: 1;
+      background: transparent;
+      border: none;
+      outline: none;
+      color: var(--text-primary);
+      font-family: var(--font-mono);
+      font-size: 16px;
+    }
+
+    .search-input::placeholder {
+      color: #55575e;
+    }
+
+    .kbd-hint {
+      background: var(--bg-card);
+      border: 1px solid var(--border-subtle);
+      color: var(--text-muted);
+      font-family: var(--font-mono);
+      font-size: 11px;
+      padding: 3px 6px;
+      border-radius: 5px;
+    }
+
+    .search-btn {
+      background: var(--text-primary);
+      color: var(--bg-base);
+      border: none;
+      padding: 10px 22px;
+      border-radius: 8px;
+      font-weight: 700;
+      font-size: 14px;
+      cursor: pointer;
+      transition: opacity 0.2s, transform 0.1s;
+    }
+
+    .search-btn:hover {
+      opacity: 0.9;
+    }
+
+    .search-btn:active {
+      transform: scale(0.98);
+    }
+
+    /* Preset Quick Tags */
+    .preset-tags {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-wrap: wrap;
+      justify-content: center;
+      font-size: 13px;
+      color: var(--text-muted);
+    }
+
+    .preset-chip {
+      background: var(--bg-surface);
+      border: 1px solid var(--border-subtle);
+      color: var(--text-primary);
+      padding: 5px 12px;
+      border-radius: 100px;
+      font-family: var(--font-mono);
+      font-size: 12px;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .preset-chip:hover {
+      border-color: var(--accent-blue);
+      background: var(--bg-card);
+    }
+
+    /* Scorecard Display Grid */
+    .scorecard-section {
+      background: var(--bg-surface);
+      border: 1px solid var(--border-subtle);
+      border-radius: 16px;
+      padding: 28px;
+      display: flex;
+      flex-direction: column;
+      gap: 24px;
+    }
+
+    .user-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 16px;
+      padding-bottom: 20px;
+      border-bottom: 1px solid var(--border-subtle);
+    }
+
+    .user-profile {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+
+    .user-avatar {
+      width: 56px;
+      height: 56px;
+      border-radius: 12px;
+      border: 1px solid var(--border-subtle);
+      background: var(--bg-card);
+    }
+
+    .user-handle {
+      font-size: 22px;
+      font-weight: 800;
+    }
+
+    .user-archetype-badge {
+      display: inline-block;
+      margin-top: 4px;
+      background: rgba(41, 151, 255, 0.12);
+      border: 1px solid rgba(41, 151, 255, 0.3);
+      color: var(--accent-blue);
+      font-size: 12px;
+      font-weight: 600;
+      padding: 3px 10px;
+      border-radius: 6px;
+    }
+
+    .aura-score-box {
+      text-align: right;
+    }
+
+    .aura-score-label {
+      font-size: 11px;
+      letter-spacing: 1px;
+      color: var(--text-muted);
+      font-weight: 600;
+    }
+
+    .aura-score-value {
+      font-family: var(--font-mono);
+      font-size: 38px;
+      font-weight: 800;
+      color: var(--accent-green);
+    }
+
+    /* Roast Banner */
+    .roast-banner {
+      background: var(--bg-elevated);
+      border-left: 3px solid var(--accent-amber);
+      padding: 16px 20px;
+      border-radius: 0 10px 10px 0;
+      font-style: italic;
+      color: #dedee2;
+      line-height: 1.5;
+      font-size: 15px;
+    }
+
+    /* Real Velocity Metrics Grid */
+    .metrics-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      gap: 14px;
+    }
+
+    .metric-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border-subtle);
+      border-radius: 10px;
+      padding: 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .metric-title {
+      font-size: 11px;
+      color: var(--text-muted);
+      letter-spacing: 0.5px;
+      font-weight: 600;
+    }
+
+    .metric-val {
+      font-family: var(--font-mono);
+      font-size: 20px;
+      font-weight: 700;
+      color: var(--text-primary);
+    }
+
+    /* Live SVG Preview & Embed Code */
+    .embed-section {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      background: var(--bg-surface);
+      border: 1px solid var(--border-subtle);
+      border-radius: 14px;
+      padding: 20px;
+    }
+
+    .embed-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .embed-title {
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--text-muted);
+    }
+
+    .copy-btn {
+      background: var(--bg-card);
+      border: 1px solid var(--border-subtle);
+      color: var(--text-primary);
+      padding: 6px 14px;
+      border-radius: 6px;
+      font-size: 12px;
+      font-weight: 600;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      transition: all 0.2s;
+    }
+
+    .copy-btn:hover {
+      background: var(--bg-elevated);
+      border-color: var(--accent-blue);
+    }
+
+    .code-box {
+      background: var(--bg-base);
+      border: 1px solid var(--border-subtle);
+      border-radius: 8px;
+      padding: 14px;
+      font-family: var(--font-mono);
+      font-size: 12px;
+      color: #a0a0ab;
+      overflow-x: auto;
+      white-space: pre-wrap;
+      word-break: break-all;
+    }
+
+    /* SVG Preview Frame */
+    .svg-preview-frame {
+      display: flex;
+      justify-content: center;
+      padding: 24px;
+      background: var(--bg-base);
+      border: 1px solid var(--border-subtle);
+      border-radius: 12px;
+    }
+
+    .svg-preview-frame img {
+      max-width: 100%;
+      height: auto;
+      border-radius: 10px;
+    }
+
+    /* Footer */
+    footer {
+      text-align: center;
+      font-size: 13px;
+      color: #55575e;
+      margin-top: 20px;
+    }
+
+    /* Toast */
+    .toast {
+      position: fixed;
+      bottom: 24px;
+      right: 24px;
+      background: var(--bg-card);
+      border: 1px solid var(--accent-green);
+      color: var(--accent-green);
+      padding: 10px 18px;
+      border-radius: 8px;
+      font-size: 13px;
+      font-weight: 600;
+      display: none;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.6);
+      z-index: 100;
+    }
+  </style>
+</head>
+<body>
+  <div class="ambient-glow"></div>
+
+  <div class="container">
+    <header>
+      <div class="logo-badge">
+        <span>🪓 AuraCode</span>
+        <span class="pill-tag">Raycast Titanium</span>
+      </div>
+      <div class="status-live">
+        <span class="dot-live"></span>
+        <span>ENGINE LIVE</span>
+      </div>
+    </header>
+
+    <div class="hero">
+      <h1 class="hero-title">Developer Spotify Wrapped<br>&amp; GitHub Clout Engine</h1>
+      <p class="hero-subtitle">Ingest public GitHub commit timelines, review latency, and code churn to compute your true Developer Aura Score and Staff-Engineer archetype.</p>
+    </div>
+
+    <div class="search-card">
+      <div class="search-input-wrapper">
+        <span class="search-icon">🔍</span>
+        <input type="text" id="usernameInput" class="search-input" placeholder="Enter GitHub username (e.g. torvalds, karpathy, octocat)..." value="octocat" autocomplete="off" spellcheck="false">
+        <span class="kbd-hint">⌘K</span>
+        <button id="searchBtn" class="search-btn">Calculate Aura</button>
+      </div>
+    </div>
+
+    <div class="preset-tags">
+      <span>Quick profiles:</span>
+      <span class="preset-chip" onclick="analyzeUser('torvalds')">@torvalds</span>
+      <span class="preset-chip" onclick="analyzeUser('karpathy')">@karpathy</span>
+      <span class="preset-chip" onclick="analyzeUser('shadcn')">@shadcn</span>
+      <span class="preset-chip" onclick="analyzeUser('geohot')">@geohot</span>
+      <span class="preset-chip" onclick="analyzeUser('octocat')">@octocat</span>
+    </div>
+
+    <div class="scorecard-section" id="scorecard">
+      <div class="user-header">
+        <div class="user-profile">
+          <img id="avatarImg" src="https://github.com/identicons/octocat.png" alt="Avatar" class="user-avatar">
+          <div>
+            <h2 id="displayUsername" class="user-handle">@octocat</h2>
+            <div id="archetypeBadge" class="user-archetype-badge">The YAML Whisperer</div>
+          </div>
+        </div>
+        <div class="aura-score-box">
+          <div class="aura-score-label">DEVELOPER AURA</div>
+          <div id="auraScore" class="aura-score-value">+4,200</div>
+        </div>
+      </div>
+
+      <div class="roast-banner" id="roastText">
+        "You speak fluent Kubernetes, have 24 GitHub Actions running in parallel, and haven't written application logic in six months."
+      </div>
+
+      <div class="metrics-grid">
+        <div class="metric-card">
+          <span class="metric-title">CODE CHURN RATIO</span>
+          <span id="churnRatio" class="metric-val">15%</span>
+        </div>
+        <div class="metric-card">
+          <span class="metric-title">WEEKEND COMMITS</span>
+          <span id="weekendRatio" class="metric-val">40%</span>
+        </div>
+        <div class="metric-card">
+          <span class="metric-title">PR TURNAROUND</span>
+          <span id="prTurnaround" class="metric-val">4.5h</span>
+        </div>
+        <div class="metric-card">
+          <span class="metric-title">ENGINEERING VERDICT</span>
+          <span id="verdictText" class="metric-val" style="color: var(--accent-green); font-size: 15px;">PRODUCTION READY</span>
+        </div>
+      </div>
+
+      <div class="svg-preview-frame">
+        <img id="svgPreview" src="/api/aura/octocat.svg" alt="Dynamic SVG Aura Card">
+      </div>
+
+      <div class="embed-section">
+        <div class="embed-header">
+          <span class="embed-title">DYNAMIC README SVG EMBED (EDGE CACHED)</span>
+          <button class="copy-btn" onclick="copyEmbedCode()">📋 Copy Markdown</button>
+        </div>
+        <div id="embedCode" class="code-box">[![AuraCode](http://localhost:8001/api/aura/octocat.svg)](http://localhost:8001)</div>
+      </div>
+    </div>
+
+    <footer>
+      Built autonomously by Dev-Autopilot Engine • IEEE DTU Vihaan X Software Track
+    </footer>
+  </div>
+
+  <div id="toast" class="toast">Copied markdown embed to clipboard!</div>
+
+  <script>
+    const input = document.getElementById('usernameInput');
+    const searchBtn = document.getElementById('searchBtn');
+
+    // Tactile keyboard shortcut: Cmd+K or / focuses search input
+    window.addEventListener('keydown', (e) => {
+      if ((e.metaKey || e.ctrlKey) && e.key === 'k') {
+        e.preventDefault();
+        input.focus();
+        input.select();
+      } else if (e.key === '/' && document.activeElement !== input) {
+        e.preventDefault();
+        input.focus();
+        input.select();
+      }
+    });
+
+    searchBtn.addEventListener('click', () => {
+      const u = input.value.trim().replace(/^@/, '');
+      if (u) analyzeUser(u);
+    });
+
+    input.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') {
+        const u = input.value.trim().replace(/^@/, '');
+        if (u) analyzeUser(u);
+      }
+    });
+
+    async function analyzeUser(username) {
+      input.value = username;
+      searchBtn.innerText = 'Analyzing...';
+      searchBtn.disabled = true;
+
+      try {
+        const res = await fetch(`/api/aura/${encodeURIComponent(username)}`);
+        if (!res.ok) throw new Error('Failed to fetch profile');
+        const data = await res.json();
+
+        // Update UI
+        document.getElementById('displayUsername').innerText = `@${data.username}`;
+        document.getElementById('avatarImg').src = data.avatar_url;
+        document.getElementById('archetypeBadge').innerText = data.archetype;
+
+        const score = data.aura_score;
+        const scoreElem = document.getElementById('auraScore');
+        const scoreSign = score > 0 ? '+' : '';
+        scoreElem.innerText = `${scoreSign}${score.toLocaleString()}`;
+
+        if (score >= 3000) {
+          scoreElem.style.color = 'var(--accent-green)';
+        } else if (score >= 0) {
+          scoreElem.style.color = 'var(--accent-amber)';
+        } else {
+          scoreElem.style.color = 'var(--accent-red)';
+        }
+
+        document.getElementById('roastText').innerText = `"${data.roast_commentary}"`;
+
+        // Churn & metrics
+        const churn = data.churn_ratio ? Math.round(data.churn_ratio * 100) : 15;
+        const weekend = data.weekend_commit_ratio ? Math.round(data.weekend_commit_ratio * 100) : 40;
+        const prHours = data.pr_turnaround_hours || 4.5;
+
+        document.getElementById('churnRatio').innerText = `${churn}%`;
+        document.getElementById('weekendRatio').innerText = `${weekend}%`;
+        document.getElementById('prTurnaround').innerText = `${prHours}h`;
+
+        // Update dynamic SVG
+        const svgUrl = `/api/aura/${encodeURIComponent(username)}.svg?t=${Date.now()}`;
+        document.getElementById('svgPreview').src = svgUrl;
+
+        // Update Embed Code
+        const origin = window.location.origin;
+        const embed = `[![AuraCode](${origin}/api/aura/${username}.svg)](${origin})`;
+        document.getElementById('embedCode').innerText = embed;
+      } catch (err) {
+        console.error(err);
+      } finally {
+        searchBtn.innerText = 'Calculate Aura';
+        searchBtn.disabled = false;
+      }
+    }
+
+    function copyEmbedCode() {
+      const code = document.getElementById('embedCode').innerText;
+      navigator.clipboard.writeText(code).then(() => {
+        const toast = document.getElementById('toast');
+        toast.style.display = 'block';
+        setTimeout(() => { toast.style.display = 'none'; }, 2500);
+      });
+    }
+
+    // Auto-initialize on load
+    analyzeUser('octocat');
+  </script>
+</body>
+</html>
