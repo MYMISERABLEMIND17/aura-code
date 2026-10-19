@@ -1,9 +1,5 @@
-from fastapi import APIRouter, Depends, HTTPException, status
-from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy.future import select
+from fastapi import APIRouter, HTTPException, status
 import hashlib
-from src.core.database import get_db
-from src.models.user import User
 from src.schemas.aura import AuraProfileResponse
 from src.services.calculator import AuraCalculatorService
 from src.services.roaster import RoasterService
@@ -15,7 +11,7 @@ roaster = RoasterService()
 github_client = GitHubClient()
 
 @router.get("/{username}", response_model=AuraProfileResponse)
-async def get_user_aura(username: str, db: AsyncSession = Depends(get_db)):
+async def get_user_aura(username: str):
     # 1. Fetch user github info
     gh_data = await github_client.fetch_user_data(username)
     avatar_url = gh_data.get("avatar_url", f"https://github.com/identicons/{username}.png")

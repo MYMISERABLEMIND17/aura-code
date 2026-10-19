@@ -9,9 +9,16 @@ app = FastAPI(title="AuraCode Engine", version="5.0.0")
 
 @app.get("/", response_class=HTMLResponse)
 async def serve_index():
-    index_file = Path(__file__).parent / "web" / "index.html"
-    if index_file.exists():
-        return HTMLResponse(content=index_file.read_text(encoding="utf-8"))
+    current_dir = Path(__file__).resolve().parent
+    paths_to_check = [
+        current_dir / "web" / "index.html",
+        current_dir.parent / "api" / "index.html",
+        Path("/var/task/src/web/index.html"),
+        Path("/var/task/api/index.html"),
+    ]
+    for p in paths_to_check:
+        if p.exists():
+            return HTMLResponse(content=p.read_text(encoding="utf-8"))
     return HTMLResponse("<h1>AuraCode Engine API</h1>")
 
 @app.exception_handler(AuraCodeException)

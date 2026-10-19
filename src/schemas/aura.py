@@ -8,5 +8,4 @@ class AuraProfileResponse(BaseModel):
     roast_commentary: str
     version_hash: str
 
-    class Config:
-        from_attributes = True
+    model_config = {"from_attributes": True}
