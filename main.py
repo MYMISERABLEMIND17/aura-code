@@ -15,6 +15,17 @@ import httpx
 
 app = FastAPI(title="AuraCode Engine", version="5.0.0")
 
+@app.middleware("http")
+async def preserve_vercel_path(request: Request, call_next):
+    original_path = (
+        request.headers.get("x-matched-path")
+        or request.headers.get("x-forwarded-uri")
+        or request.headers.get("x-original-url")
+    )
+    if request.url.path == "/api/index.py" and original_path and original_path != "/api/index.py":
+        request.scope["path"] = original_path.split("?")[0]
+    return await call_next(request)
+
 # ── Global Diagnostic Handler for Vercel ───────────────────────
 @app.exception_handler(Exception)
 async def global_exception_handler(request: Request, exc: Exception):
