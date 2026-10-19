@@ -3,21 +3,12 @@ name = "auracode"
 version = "5.0.0"
 description = "Dev Spotify Wrapped & GitHub Clout Engine"
 readme = "README.md"
-requires-python = ">=3.9"
+requires-python = ">=3.12"
 dependencies = [
     "fastapi>=0.100.0",
     "uvicorn>=0.28.0",
     "pydantic>=2.0.0",
     "httpx>=0.25.0"
-]
-
-[project.optional-dependencies]
-full = [
-    "sqlalchemy>=2.0.28",
-    "asyncpg>=0.29.0",
-    "redis>=5.0.2",
-    "aioboto3>=12.3.0",
-    "cryptography>=42.0.5"
 ]
 
 [tool.pytest.ini_options]
